@@ -39,7 +39,108 @@ public class AvlTree {
                 add(node.getRight(), nodeToBeAdded);
             }
         }
-        checkBalance(node);
+        if (!checkBalance(node)) {
+            rebalance(node);
+        }
+    }
+
+    /**
+     * checks what kind of rotation a tree needs and does it to restore balance;
+     * @param node to restore balance to
+     */
+    public void rebalance(@NonNull Node node) {
+        int maxNodesOnLeft = maxNodes(node.getLeft());
+        if (node.getLeft() != null) {
+            maxNodesOnLeft++;
+        }
+
+        int maxNodesOnRight = maxNodes(node.getRight());
+        if (node.getRight() != null) {
+            maxNodesOnRight++;
+        }
+        if (maxNodesOnLeft - maxNodesOnRight > 1) {
+            int maxNodesOnLeftLeft = node.getLeft() != null ? maxNodes(node.getLeft().getLeft()) : 0;
+            if (node.getLeft() != null && node.getLeft().getLeft() != null) {
+                maxNodesOnLeftLeft++;
+            }
+
+            int maxNodesOnLeftRight = node.getLeft() != null ? maxNodes(node.getLeft().getRight()) : 0;
+            if (node.getLeft() != null && node.getLeft().getRight() != null) {
+                maxNodesOnLeftRight++;
+            }
+
+            if (maxNodesOnLeftLeft - maxNodesOnLeftRight >= 1) {
+                rightRotate(node);
+            } else {
+                leftRightRotate(node);
+            }
+        } else {
+            int maxNodesRightLeft = node.getRight() != null ? maxNodes(node.getRight().getLeft()) : 0;
+            if (node.getRight() !=null && node.getRight().getLeft() != null) {
+                maxNodesRightLeft++;
+            }
+            int maxNodesRightRight = node.getRight() != null ? maxNodes(node.getRight().getRight()) : 0;
+            if (node.getRight() != null && node.getRight().getRight() != null) {
+                maxNodesRightRight++;
+            }
+            if (maxNodesRightLeft - maxNodesRightRight >= 1) {
+                rightLeftRotate(node);
+            } else {
+                leftRotate(node);
+            }
+        }
+    }
+
+    private void rightLeftRotate(Node node) {
+        rightRotate(node.getRight());
+        leftRotate(node);
+    }
+
+    private void leftRightRotate(Node node) {
+        leftRotate(node.getLeft());
+        rightRotate(node);
+    }
+
+    private void rightRotate(Node grandParent) {
+        Node grandGrandParent = grandParent.getParent();
+        Node parent = grandParent.getLeft();
+        parent.setParent(grandGrandParent);
+        if (grandGrandParent != null) {
+            if (grandParent.equals(grandGrandParent.getLeft())) {
+                grandGrandParent.setLeft(parent);
+            } else {
+                grandGrandParent.setRight(parent);
+            }
+        }
+        grandParent.setParent(parent);
+        grandParent.setLeft(null);
+        Node tempRight = parent.getRight();
+        parent.setRight(grandParent);
+        if (tempRight != null) {
+            tempRight.setParent(null);
+            add(grandParent, tempRight);
+        }
+    }
+
+    private void leftRotate(Node grandParent) {
+        Node grandGrandParent = grandParent.getParent();
+        Node parent = grandParent.getRight();
+        parent.setParent(grandGrandParent);
+        if (grandGrandParent != null) {
+            if (grandParent.equals(grandGrandParent.getLeft())) {
+                grandGrandParent.setLeft(parent);
+            } else {
+                grandGrandParent.setRight(parent);
+            }
+        }
+        grandParent.setParent(parent);
+        grandParent.setRight(null);
+        Node tempRight = parent.getLeft();
+        parent.setLeft(grandParent);
+        if (tempRight != null) {
+            tempRight.setParent(null);
+            add(grandParent, tempRight);
+        }
     }
 
     /**
